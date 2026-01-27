@@ -1,0 +1,40 @@
+{
+  "name": "mongoose-studio",
+  "version": "1.0.1",
+  "description": "A modern, zero-config GUI for your Mongoose models. Run instantly with npx mongoose-studio.",
+  "keywords": [
+    "mongoose",
+    "gui",
+    "studio",
+    "admin",
+    "mongodb",
+    "cli",
+    "database"
+  ],
+  "author": "Yasir",
+  "license": "MIT",
+  "module": "index.ts",
+  "type": "module",
+  "bin": {
+    "mongoose-studio": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "bun bin/index.ts",
+    "build": "rm -rf dist ui/out && (cd ui && bun run build) && mkdir -p dist/ui && cp -r ui/out/* dist/ui/ && bun build bin/index.ts --outfile dist/index.js --target bun",
+    "prepublishOnly": "bun run build",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "hono": "^4.11.7",
+    "mongoose": "^9.1.5"
+  }
+}

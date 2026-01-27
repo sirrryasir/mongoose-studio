@@ -1,0 +1,34 @@
+
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+
+    - name: Install Dependencies
+      run: |
+        bun install
+        cd ui && bun install
+
+    - name: Lint
+      run: |
+        # Add lint scripts here if you have them in root, otherwise lint UI
+        cd ui && bun run lint
+
+    - name: Build UI
+      run: |
+        cd ui && bun run build
