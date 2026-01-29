@@ -58,7 +58,7 @@ async function main() {
         errors.forEach(err => console.error(`   Error: ${err}`));
     } else if (manualModelsDir) {
         console.error(`Error: The specified models directory '${manualModelsDir}' was not found.`);
-    } else if (modelNames.length === 0) {
+    } else if (mongoose.modelNames().length === 0) {
         console.warn("Hint: No 'models/' or 'src/models/' directory found. If your models are elsewhere, use --models=path/to/models");
     }
 
