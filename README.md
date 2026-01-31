@@ -1,66 +1,83 @@
-# Mongoose Studio
+# <img src="https://mongoose-studio.yaasir.dev/logo.png" width="40" valign="middle" alt="Mongoose Studio Logo" /> Mongoose Studio
 
-**A Graphical User Interface for Mongoose.**
-Visualize Mongoose models, schemas, and data within existing projects.
+**Your Mongoose Data, Visualized.**
+
+![Mongoose Studio Banner](https://mongoose-studio.yaasir.dev/hero-screenshot.png)
+
+[![npm version](https://img.shields.io/npm/v/mongoose-studio.svg?style=flat-square)](https://www.npmjs.org/package/mongoose-studio)
+[![install size](https://img.shields.io/badge/dynamic/json?url=https://packagephobia.com/v2/api.json?p=mongoose-studio&query=$.install.pretty&label=install%20size&style=flat-square)](https://packagephobia.now.sh/result?p=mongoose-studio)
+[![downloads](https://img.shields.io/npm/dm/mongoose-studio.svg?style=flat-square)](https://npm-stat.com/charts.html?package=mongoose-studio)
+
+Mongoose Studio is a **zero-config CLI tool** that provides an instant Graphical User Interface (GUI) for your Mongoose models. It bridges the gap between your code definitions and your actual database.
+
+👉 **[Launch Documentation Website](https://mongoose-studio.yaasir.dev)**
+
+---
 
 ## Features
 
- - **Zero Configuration**: Execute `npx mongoose-studio` in the project root to start.
- - **Schema Inspection**: Visualize schemas, types, validations, and default values.
- - **Data Exploration**: View documents in a tabular format.
- - **Read-Only**: Prevents accidental data modification by defaulting to read-only mode.
- - **Auto-Detection**: Automatically detects the `models/` directory and `.env` configuration.
- - **Unified Execution**: Launches both the API and UI with a single command.
+-   **Zero Configuration**: No config files, no route setup. It reads your code.
+-   **Schema-Aware**: Visualizes data respecting your Mongoose schema types, defaults, and validations.
+-   **Read-Only Safe**: Defaults to read-only mode to prevent accidental production edits.
+-   **Instant Launch**: Runs directly from your terminal using `npx` or `bunx`.
+-   **Hot Reload**: (Coming Soon) Updates the UI as you change your schemas.
 
 ## Quick Start
 
-Execute the tool directly in the project directory (no installation required):
+Go to your project directory (where your `models/` folder lives) and run:
 
 ```bash
-# Using Bun
-bunx mongoose-studio
-
-# Using npm
 npx mongoose-studio
 ```
 
-That's it! Your browser will open automatically.
+or with Bun:
 
-## 🛠️ Requirements
-
-- **Runtime**: Node.js (v18+) or Bun (v1+).
-- **Database**: A running MongoDB instance.
-- **Project**: A project using `mongoose` with models defined.
-
-## ⚙️ Configuration
-
-Mongoose Studio tries to be smart, but you can override defaults:
-
-| Flag | Env Var | Default | Description |
-|------|---------|---------|-------------|
-| `--port` | `PORT` | `5555` | Port for the Studio server |
-| `--uri` | `MONGO_URI` | `mongodb://localhost:27017/test` | MongoDB Connection String |
-
-Example:
 ```bash
-bunx mongoose-studio --port=8080 --uri=mongodb://user:pass@remote:27017/prod
+bunx mongoose-studio
 ```
 
-## 🏗️ How it Works
+That's it! 
+1.  It automatically finds your models.
+2.  It connects using your `.env` string.
+3.  It opens **http://localhost:5555**.
 
-1.  **Scans Models**: Looks for a `models/` directory in your current working directory.
-2.  **Loads Code**: Dynamically imports your model files to register them with Mongoose.
-3.  **Introspects**: Reads the registered Mongoose schemas to build the UI columns.
-4.  **Connects**: Connects to the DB using your local environment variables.
-5.  **Serves**: Starts a local server that hosts the UI and the API.
+## Configuration
 
-## 🤝 Contributing
+While it works out of the box, you can customize it via flags:
 
-We love contributions!
-1.  Clone the repo: `git clone https://github.com/sirrryasir/mongoose-studio`
-2.  Install deps: `bun install`
-3.  Run dev: `bun run dev`
+| Flag       | Default                      | Description                                      |
+| :--------- | :--------------------------- | :----------------------------------------------- |
+| `--port`   | `5555`                       | The port to run the Studio server on.            |
+| `--uri`    | `process.env.MONGO_URI`      | Custom MongoDB connection string.                |
+| `--models` | Auto-detected (`./models`, etc) | Path to your models folder if not found automatically. |
 
-## 📄 License
+**Example:**
+```bash
+npx mongoose-studio --port=8080 --models=src/database/schemas
+```
 
-MIT © Yasir
+## Troubleshooting
+
+**"Mongoose not found"**
+Ensure you are running the command in the root of a project that has `mongoose` installed (`npm install mongoose`).
+
+**"No models found"**
+Mongoose Studio looks in common folders (`models`, `src/models`, `lib/models`). If you store them elsewhere, use the `--models` flag:
+`npx mongoose-studio --models=src/entities`
+
+**"Port in use"**
+If port 5555 is taken, the tool connects to the next available port automatically (e.g., 5556).
+
+> For deeper troubleshooting, check the [Documentation Site](https://mongoose-studio.yaasir.dev/docs).
+
+## Contributing
+
+We love contributions! Mongoose Studio is a monorepo built with **Bun**, **Hono** (Server), and **Next.js** (UI).
+
+1.  Clone the repository.
+2.  Run `bun install`.
+3.  Run `bun run dev` to start both the CLI logic and the Next.js UI in development mode.
+
+## License
+
+MIT © [Yasir](https://github.com/sirrryasir)
