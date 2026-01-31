@@ -1,6 +1,6 @@
 {
   "name": "mongoose-studio",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A modern, zero-config GUI for your Mongoose models. Run instantly with npx mongoose-studio.",
   "keywords": [
     "mongoose",

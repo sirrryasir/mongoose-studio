@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "./ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,8 +14,37 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mongoose Studio",
-  description: "A modern, zero-config GUI for your Mongoose models.",
+  title: {
+    default: "Mongoose Studio",
+    template: "%s | Mongoose Studio",
+  },
+  description: "A modern, zero-config GUI for your Mongoose models. Inspect schemas, view data, and debug queries instantly without leaving your terminal.",
+  keywords: ["mongoose", "mongodb", "gui", "admin", "dashboard", "developer tools", "cli", "typescript"],
+  authors: [{ name: "Yasir", url: "https://yaasir.dev" }],
+  creator: "Yasir",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://mongoose-studio.yaasir.dev",
+    siteName: "Mongoose Studio",
+    title: "Mongoose Studio - Your Mongoose Data, Visualized",
+    description: "Inspect schemas, view data, and debug queries instantly without leaving your terminal. Zero config required.",
+    images: [
+      {
+        url: "/hero-screenshot.png",
+        width: 1200,
+        height: 630,
+        alt: "Mongoose Studio Dashboard",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Mongoose Studio",
+    description: "A modern, zero-config GUI for your Mongoose models.",
+    images: ["/hero-screenshot.png"],
+    creator: "@sirrryasir",
+  },
 };
 
 export default function RootLayout({
@@ -23,11 +53,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-zinc-950 text-zinc-200 selection:bg-emerald-500/30 selection:text-emerald-400`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground selection:bg-emerald-500/30 selection:text-emerald-400`}
       >
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

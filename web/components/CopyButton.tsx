@@ -14,7 +14,7 @@ export function CopyButton({ text }: { text: string }) {
 
     return (
         <button
-            className="text-zinc-500 hover:text-white transition-colors p-2"
+            className="text-muted-foreground hover:text-foreground transition-colors p-2"
             onClick={onCopy}
             title="Copy to clipboard"
         >
