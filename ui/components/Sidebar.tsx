@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Database, Box } from 'lucide-react';
 import useSWR from 'swr';
 import { useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
@@ -16,7 +17,7 @@ export function Sidebar() {
     return (
         <aside className="w-64 bg-zinc-900 border-r border-zinc-800 text-zinc-300 flex flex-col h-screen fixed left-0 top-0">
             <div className="p-4 border-b border-zinc-800 flex items-center gap-2">
-                <Database className="w-5 h-5 text-emerald-400" />
+                <Image src="/logo.png" alt="Mongoose Studio Logo" className="w-6 h-6 object-contain" />
                 <span className="font-bold text-emerald-50 tracking-tight">Mongoose Studio</span>
             </div>
 
@@ -30,8 +31,8 @@ export function Sidebar() {
                         key={model}
                         href={`/?model=${model}`}
                         className={`flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${currentModel === model
-                                ? 'bg-emerald-500/10 text-emerald-400'
-                                : 'hover:bg-zinc-800 hover:text-white'
+                            ? 'bg-emerald-500/10 text-emerald-400'
+                            : 'hover:bg-zinc-800 hover:text-white'
                             }`}
                     >
                         <Box className="w-4 h-4 opacity-70" />

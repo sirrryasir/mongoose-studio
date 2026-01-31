@@ -28,13 +28,13 @@
     "test": "bun test"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "mongoose": "^9.1.5"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
-    "hono": "^4.11.7",
-    "mongoose": "^9.1.5"
+    "hono": "^4.11.7"
   }
 }

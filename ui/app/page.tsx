@@ -3,6 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { ModelView } from '@/components/ModelView';
+import Image from 'next/image';
 
 function AppContent() {
   const searchParams = useSearchParams();
@@ -15,9 +16,7 @@ function AppContent() {
   return (
     <div className="flex flex-col items-center justify-center h-full text-center">
       <div className="p-4 rounded-full bg-zinc-900 border border-zinc-800 mb-6">
-        <svg className="w-10 h-10 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
+        <Image src="/logo.png" alt="Logo" width={48} height={48} />
       </div>
       <h1 className="text-3xl font-bold text-white mb-2">Welcome to Mongoose Studio</h1>
       <p className="text-zinc-500 max-w-md">

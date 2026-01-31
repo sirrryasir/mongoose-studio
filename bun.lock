@@ -6,10 +6,10 @@
       "name": "mongoose-studio",
       "dependencies": {
         "hono": "^4.11.7",
-        "mongoose": "^9.1.5",
       },
       "devDependencies": {
         "@types/bun": "latest",
+        "mongoose": "^9.1.5",
       },
       "peerDependencies": {
         "typescript": "^5",
