@@ -1,6 +1,7 @@
 
 import path from "path";
 import fs from "fs";
+import { CONFIG } from "../config";
 
 export async function loadLocalModels(modelsPath: string): Promise<{ loaded: string[], errors: string[] }> {
     const results = {
@@ -9,21 +10,35 @@ export async function loadLocalModels(modelsPath: string): Promise<{ loaded: str
     };
 
     if (!fs.existsSync(modelsPath)) {
+        if (CONFIG.VERBOSE) console.log(`   \x1b[33m[DEBUG]\x1b[0m Models path does not exist: ${modelsPath}`);
         return results;
     }
+
+    if (CONFIG.VERBOSE) console.log(`   \x1b[33m[DEBUG]\x1b[0m Scanning recursively in: ${modelsPath}`);
 
     // Use Bun's native Glob for recursive scanning
     const glob = new Bun.Glob("**/*.{ts,js}");
 
     for await (const file of glob.scan({ cwd: modelsPath })) {
         // Skip definition files
-        if (file.endsWith(".d.ts")) continue;
+        if (file.endsWith(".d.ts")) {
+            if (CONFIG.VERBOSE) console.log(`   \x1b[33m[DEBUG]\x1b[0m Skipped definition file: ${file}`);
+            continue;
+        }
+
+        // Skip strange files like .test.ts or .spec.ts optionally, but for now we keep it simple
 
         const fullPath = path.join(modelsPath, file);
+        if (CONFIG.VERBOSE) console.log(`   \x1b[33m[DEBUG]\x1b[0m Attempting to load: ${file}`);
+
         try {
             await import(fullPath);
             results.loaded.push(file);
         } catch (err: any) {
+            if (CONFIG.VERBOSE) {
+                console.error(`   \x1b[31m[DEBUG]\x1b[0m Failed to import ${file}:`);
+                console.error(err);
+            }
             results.errors.push(`${file}: ${err.message}`);
         }
     }

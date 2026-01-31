@@ -38,6 +38,15 @@ Options:
 
     console.log("\n\x1b[36mStarting Mongoose Studio...\x1b[0m\n");
 
+    // Parse Flags
+    if (process.argv.includes("--verbose") || process.argv.includes("-v")) {
+        CONFIG.VERBOSE = true;
+        console.log("   \x1b[33m[VERBOSE MODE ENABLED]\x1b[0m");
+    }
+
+    // Check for Updates (Non-blocking)
+    checkForUpdates();
+
     const projectRoot = process.cwd();
     // Try to find user's mongoose
     const userMongoosePath = path.join(projectRoot, "node_modules", "mongoose");
@@ -123,7 +132,7 @@ Options:
 
     // Allow override via --port
     const portArg = process.argv.find(arg => arg.startsWith("--port="));
-    let port = (portArg && parseInt(portArg.split("=")[1])) || CONFIG.API_PORT;
+    let port = (portArg && parseInt(portArg.split("=")[1])) || CONFIG.DEFAULT_PORT;
 
     // Retry finding port
     const maxRetries = 10;
@@ -184,3 +193,38 @@ main().catch(err => {
     console.error("Fatal Error:", err);
     process.exit(1);
 });
+
+async function checkForUpdates() {
+    try {
+        const pkg = require(path.join(process.cwd(), "package.json"));
+        // Note: The above might load the project's package.json if run from project root. 
+        // To be safe, we should load our OWN package.json. 
+        // In the build structure, package.json is usually at root or dist. 
+        // But for Global CLI, checking "mongoose-studio" registry is enough.
+
+        // We can just use hardcoded version or read from ../package.json if we are in bin/
+        // But simpler: just fetch latest and compare. 
+        // If we want current version, we can import it.
+        const currentVersion = "1.0.3";
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 1000); // 1s timeout
+
+        const res = await fetch("https://registry.npmjs.org/mongoose-studio/latest", {
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+            const data = await res.json() as { version?: string };
+            const latestVersion = data.version;
+            if (latestVersion && latestVersion !== currentVersion) {
+                console.log("\n\x1b[43m\x1b[30m UPDATE AVAILABLE \x1b[0m \x1b[36m" + currentVersion + " \x1b[0m→ \x1b[32m" + latestVersion + "\x1b[0m");
+                console.log("Run \x1b[36mnpm i -g mongoose-studio\x1b[0m to update.\n");
+            }
+        }
+    } catch (e) {
+        // Ignore update check failures
+        if (CONFIG.VERBOSE) console.log("   \x1b[33m[DEBUG]\x1b[0m Update check failed (ignoring).");
+    }
+}

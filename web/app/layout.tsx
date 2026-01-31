@@ -31,6 +31,12 @@ export const metadata: Metadata = {
     description: "Inspect schemas, view data, and debug queries instantly without leaving your terminal. Zero config required.",
     images: [
       {
+        url: "/logo.png",
+        width: 819,
+        height: 819,
+        alt: "Mongoose Studio Logo",
+      },
+      {
         url: "/hero-screenshot.png",
         width: 1200,
         height: 630,
@@ -42,7 +48,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Mongoose Studio",
     description: "A modern, zero-config GUI for your Mongoose models.",
-    images: ["/hero-screenshot.png"],
+    images: ["/logo.png"],
     creator: "@sirrryasir",
   },
 };

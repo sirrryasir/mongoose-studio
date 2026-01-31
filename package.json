@@ -9,10 +9,22 @@
     "admin",
     "mongodb",
     "cli",
-    "database"
+    "database",
+    "dashboard",
+    "visualizer",
+    "developer-tools",
+    "introspection"
   ],
   "author": "Yasir",
   "license": "MIT",
+  "homepage": "https://mongoose-studio.yaasir.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sirrryasir/mongoose-studio"
+  },
+  "bugs": {
+    "url": "https://github.com/sirrryasir/mongoose-studio/issues"
+  },
   "module": "index.ts",
   "type": "module",
   "bin": {

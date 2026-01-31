@@ -1,22 +1,18 @@
 # <img src="https://mongoose-studio.yaasir.dev/logo.png" width="40" valign="middle" alt="Mongoose Studio Logo" /> Mongoose Studio
 
-**Your Mongoose Data, Visualized.**
+> **Your Mongoose Data, Visualized.**
+> A modern, zero-config GUI for your Mongoose models. Inspect schemas, view data, and debug queries instantly without leaving your terminal.
 
-![Mongoose Studio Banner](https://mongoose-studio.yaasir.dev/hero-screenshot.png)
+![Mongoose Studio Hero](/web/public/hero-screenshot.png)
 
 [![npm version](https://img.shields.io/npm/v/mongoose-studio.svg?style=flat-square)](https://www.npmjs.org/package/mongoose-studio)
 [![install size](https://img.shields.io/badge/dynamic/json?url=https://packagephobia.com/v2/api.json?p=mongoose-studio&query=$.install.pretty&label=install%20size&style=flat-square)](https://packagephobia.now.sh/result?p=mongoose-studio)
 [![downloads](https://img.shields.io/npm/dm/mongoose-studio.svg?style=flat-square)](https://npm-stat.com/charts.html?package=mongoose-studio)
 
-Mongoose Studio is a **zero-config CLI tool** that provides an instant Graphical User Interface (GUI) for your Mongoose models. It bridges the gap between your code definitions and your actual database.
-
-👉 **[Launch Documentation Website](https://mongoose-studio.yaasir.dev)**
-
 ---
 
 ## Features
 
--   **Zero Configuration**: No config files, no route setup. It reads your code.
 -   **Schema-Aware**: Visualizes data respecting your Mongoose schema types, defaults, and validations.
 -   **Read-Only Safe**: Defaults to read-only mode to prevent accidental production edits.
 -   **Instant Launch**: Runs directly from your terminal using `npx` or `bunx`.
