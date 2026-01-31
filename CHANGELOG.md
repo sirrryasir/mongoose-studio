@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.0.3] - 2026-01-31
+## [1.0.4] - 2026-01-31
 
 ### Added
 - **Unified Single Origin Build**: The UI and API now run on a single port (`5555`), eliminating CORS issues.
