@@ -1,36 +1,23 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mongoose Studio UI
 
-## Getting Started
+This directory contains the Next.js application for the **Mongoose Studio** dashboard interface (v1.2.0).
 
-First, run the development server:
+Now features:
+- **Smart Type Inference** & **Deep Linking**
+- **Visual Aggregation Builder**
+- **Premium Dark Mode UI** with Shadcn/ui & Tailwind
+
+It handles:
+- Connection to the `mongoose-studio` server (running on port 5555 by default).
+- Rendering the Schema Explorer, Data Grid, and Document Forms.
+- Strictly dark-themed UI components built with Tailwind CSS.
+
+## Development
+
+The UI is built automatically when you run the main CLI in dev mode.
+To run this separately (for UI-only dev):
 
 ```bash
+cd ui
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

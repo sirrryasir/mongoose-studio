@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { Copy, Check, ChevronRight, Hash, Github, Menu, X } from "lucide-react";
+import { Copy, Check, ChevronRight, Hash, Github, Menu, X, Layout, Network, Brain } from "lucide-react";
 import { CodeTabs } from "../../components/CodeTabs";
 import { ThemeToggle } from "../../components/ThemeToggle";
 import { useState, useEffect } from "react";
@@ -85,7 +85,7 @@ export default function DocsPage() {
                         <section id="introduction" className="scroll-mt-24">
                             <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">Introduction</h1>
                             <p className="text-muted-foreground text-lg leading-relaxed">
-                                Mongoose Studio is a developer-first GUI for Mongoose. It auto-detects your models and launches a modern dashboard to visualize your schema and manage your data—no configuration required.
+                                Mongoose Studio is a developer-first GUI for Mongoose. It auto-detects your models and launches a modern dashboard to visualize your schema and manage your data. No configuration required.
                             </p>
                         </section>
 
@@ -134,9 +134,97 @@ export default function DocsPage() {
                             </div>
                         </section>
 
+                        <section id="core-concepts" className="pt-8 scroll-mt-24">
+                            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 group text-foreground"><Hash className="w-5 h-5 text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" /> Core Concepts</h2>
+                            <div className="space-y-8">
+                                <div>
+                                    <h3 className="text-xl font-semibold mb-3 text-foreground flex items-center gap-2"><Layout className="w-5 h-5 text-purple-400" /> Smart Grid & Virtualization</h3>
+                                    <p className="text-muted-foreground mb-4">
+                                        Mongoose Studio uses <strong className="text-zinc-300">virtualized scrolling</strong>. This means it can handle collections with 10,000+ documents without lagging your browser. It only renders what you see.
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <h3 className="text-xl font-semibold mb-3 text-foreground flex items-center gap-2"><Brain className="w-5 h-5 text-pink-400" /> Smart Inference</h3>
+                                    <p className="text-muted-foreground mb-4">
+                                        Sometimes you don&apos;t have a strict schema defined for every field (e.g. `Mixed` types). Mongoose Studio <strong>analyzes your actual data</strong> to determine if a field is a Boolean, Date, or ObjectID, giving you the correct edit controls automatically.
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <h3 className="text-xl font-semibold mb-3 text-foreground flex items-center gap-2"><Network className="w-5 h-5 text-blue-400" /> Deep Linking</h3>
+                                    <p className="text-muted-foreground mb-4">
+                                        Data is relational. If you have a field like `author_id`, Mongoose Studio detects it. Clicking the value instantly opens the referenced Author document in a side panel, allowing you to traverse your data graph effortlessly.
+                                    </p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section id="guides" className="pt-8 scroll-mt-24">
+                            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 group text-foreground"><Hash className="w-5 h-5 text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" /> Guides</h2>
+                            <div className="space-y-12">
+                                <div id="guide-usage">
+                                    <h3 className="text-xl font-bold mb-4 text-foreground">Using the Dashboard</h3>
+                                    <p className="text-muted-foreground mb-4">The dashboard is split into three main areas:</p>
+                                    <ul className="space-y-4">
+                                        <li className="flex gap-4">
+                                            <div className="w-8 h-8 rounded bg-zinc-900 flex items-center justify-center font-bold text-zinc-500 shrink-0 border border-zinc-800">L</div>
+                                            <div>
+                                                <strong className="text-zinc-200">Sidebar</strong>
+                                                <p className="text-sm text-muted-foreground">Lists all your detected Models. Use the search bar to filter widely used collections.</p>
+                                            </div>
+                                        </li>
+                                        <li className="flex gap-4">
+                                            <div className="w-8 h-8 rounded bg-zinc-900 flex items-center justify-center font-bold text-zinc-500 shrink-0 border border-zinc-800">M</div>
+                                            <div>
+                                                <strong className="text-zinc-200">Main View (Tabs)</strong>
+                                                <p className="text-sm text-muted-foreground">Each model opens in a new tab. You can keep &quot;Users&quot; and &quot;Posts&quot; open side-by-side to cross-reference data.</p>
+                                            </div>
+                                        </li>
+                                        <li className="flex gap-4">
+                                            <div className="w-8 h-8 rounded bg-zinc-900 flex items-center justify-center font-bold text-zinc-500 shrink-0 border border-zinc-800">R</div>
+                                            <div>
+                                                <strong className="text-zinc-200">Context Panel</strong>
+                                                <p className="text-sm text-muted-foreground">Clicking a row opens the Document Sheet. Here you can edit fields, view raw JSON, or delete the document.</p>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div id="guide-filtering">
+                                    <h3 className="text-xl font-bold mb-4 text-foreground">Filtering & Querying</h3>
+                                    <p className="text-muted-foreground mb-4">
+                                        The search bar isn&apos;t just for text. It supports a visual query builder.
+                                    </p>
+                                    <div className="bg-zinc-900/50 p-6 rounded-xl border border-zinc-800">
+                                        <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4">Supported Operators</h4>
+                                        <div className="grid grid-cols-2 gap-4 text-sm">
+                                            <div className="flex justify-between border-b border-zinc-800 pb-2">
+                                                <span className="font-mono text-emerald-400">equals</span>
+                                                <span className="text-zinc-500">Exact match</span>
+                                            </div>
+                                            <div className="flex justify-between border-b border-zinc-800 pb-2">
+                                                <span className="font-mono text-emerald-400">contains</span>
+                                                <span className="text-zinc-500">Partial match (Regex)</span>
+                                            </div>
+                                            <div className="flex justify-between border-b border-zinc-800 pb-2">
+                                                <span className="font-mono text-emerald-400">gt / lt</span>
+                                                <span className="text-zinc-500">Greater/Less than</span>
+                                            </div>
+                                            <div className="flex justify-between border-b border-zinc-800 pb-2">
+                                                <span className="font-mono text-emerald-400">in</span>
+                                                <span className="text-zinc-500">Match any in list</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
                         <section id="real-world-example" className="pt-8 scroll-mt-24">
                             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 group text-foreground"><Hash className="w-5 h-5 text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" /> Real World Example</h2>
                             <p className="text-muted-foreground mb-6">See how Mongoose Studio works in a real project. Follow these steps to clone a demo repo and inspect its models:</p>
+
 
                             <div className="space-y-4 mb-8">
                                 <div className="space-y-2">
@@ -172,7 +260,7 @@ export default function DocsPage() {
                                     <div className="mx-auto text-xs font-mono text-zinc-500">Mongoose Studio Dashboard</div>
                                 </div>
                                 <Image
-                                    src="/real-world-demo.png"
+                                    src="/hero-screenshot.png"
                                     alt="Mongoose Studio Dashboard"
                                     width={1200}
                                     height={800}
@@ -199,7 +287,7 @@ export default function DocsPage() {
                                     <tbody className="divide-y divide-zinc-800">
                                         <tr>
                                             <td className="px-4 py-3 font-mono text-emerald-400">MONGO_URI</td>
-                                            <td className="px-4 py-3">Your MongoDB connection string. If present in your `.env`, it will be used automatically.</td>
+                                            <td className="px-4 py-3">Your MongoDB connection string. If present in your &apos;.env&apos;, it will be used automatically.</td>
                                         </tr>
                                         <tr>
                                             <td className="px-4 py-3 font-mono text-emerald-400">PORT</td>
@@ -346,6 +434,8 @@ function DocsNav({ onClick, activeSection }: { onClick?: () => void, activeSecti
                     <li><a href="#quickstart" onClick={onClick} className={linkClass("quickstart")}>Quickstart</a></li>
                     <li><a href="#installation" onClick={onClick} className={linkClass("installation")}>Installation</a></li>
                     <li><a href="#project-setup" onClick={onClick} className={linkClass("project-setup")}>Project Setup</a></li>
+                    <li><a href="#core-concepts" onClick={onClick} className={linkClass("core-concepts")}>Core Concepts</a></li>
+                    <li><a href="#guides" onClick={onClick} className={linkClass("guides")}>Guides</a></li>
                     <li><a href="#real-world-example" onClick={onClick} className={linkClass("real-world-example")}>Real World Example</a></li>
                 </ul>
             </div>

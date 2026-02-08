@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Terminal, Zap, Shield } from "lucide-react";
+import { ArrowRight, Zap, Brain, Network } from "lucide-react";
 import { LandingHeader } from "../components/LandingHeader";
 import { motion } from "framer-motion";
 import { CodeTabs } from "../components/CodeTabs";
@@ -48,7 +48,7 @@ export default function Home() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                v1.0.3 is now available
+                v1.1.0 is now available
               </motion.div>
 
               {/* Headline */}
@@ -148,19 +148,19 @@ export default function Home() {
               <FeatureCard
                 icon={<Zap className="w-6 h-6 text-yellow-400" />}
                 title="Zero Config"
-                description="Auto-detects models from your project. No manual setup or configuration files needed."
+                description="Auto-detects models from your project. No manual setup, connection strings, or configuration files needed."
                 delay={0}
               />
               <FeatureCard
-                icon={<Terminal className="w-6 h-6 text-blue-400" />}
-                title="CLI Powered"
-                description="Runs directly from your terminal. Uses your local mongoose instance for perfect compatibility."
+                icon={<Brain className="w-6 h-6 text-pink-400" />}
+                title="Smart Inference"
+                description="Missing metadata? We analyze your actual data to determine types like Booleans and Dates automatically."
                 delay={0.1}
               />
               <FeatureCard
-                icon={<Shield className="w-6 h-6 text-emerald-400" />}
-                title="Type Safe"
-                description="Built with TypeScript. Inspects your schema types, required fields, and defaults accurately."
+                icon={<Network className="w-6 h-6 text-blue-400" />}
+                title="Deep Linking"
+                description="Data is relational. Click on any ObjectId reference to instantly open that document in a side panel."
                 delay={0.2}
               />
             </div>

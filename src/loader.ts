@@ -1,6 +1,7 @@
 
 import path from "path";
 import fs from "fs";
+import { glob } from "glob";
 import { CONFIG } from "../config";
 
 export async function loadLocalModels(modelsPath: string): Promise<{ loaded: string[], errors: string[] }> {
@@ -16,10 +17,10 @@ export async function loadLocalModels(modelsPath: string): Promise<{ loaded: str
 
     if (CONFIG.VERBOSE) console.log(`   \x1b[33m[DEBUG]\x1b[0m Scanning recursively in: ${modelsPath}`);
 
-    // Use Bun's native Glob for recursive scanning
-    const glob = new Bun.Glob("**/*.{ts,js}");
+    // Use standard glob for recursive scanning
+    const files = await glob("**/*.{ts,js}", { cwd: modelsPath });
 
-    for await (const file of glob.scan({ cwd: modelsPath })) {
+    for (const file of files) {
         // Skip definition files
         if (file.endsWith(".d.ts")) {
             if (CONFIG.VERBOSE) console.log(`   \x1b[33m[DEBUG]\x1b[0m Skipped definition file: ${file}`);

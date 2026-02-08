@@ -1,100 +1,78 @@
 import { Hono } from "hono";
 import type { Mongoose } from "mongoose";
 import path from "path";
-import { inspectModel } from "./inspector";
+import fs from "fs";
+import mime from "mime-types";
 
-export function startServer(port: number = 3000, mongoose: Mongoose) {
+// Import Routes
+import schemaRoutes from "./routes/schema";
+import modelRoutes from "./routes/models";
+import seedRoutes from "./routes/seed";
+
+export function startServer(port: number = 3000, mongoose: Mongoose, readOnly: boolean = false) {
     const app = new Hono();
 
-    // CORS - allowing all for local dev tool convenience
+    // CORS
     app.use("*", async (c, next) => {
         c.header("Access-Control-Allow-Origin", "*");
-        c.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        c.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         c.header("Access-Control-Allow-Headers", "Content-Type");
+        if (c.req.method === "OPTIONS") {
+            return c.text("OK", 204);
+        }
         await next();
     });
 
-    // Serve Static UI
+    // Read-Only Middleware
+    app.use("/api/models/*", async (c, next) => {
+        if (readOnly && ["POST", "PUT", "DELETE", "PATCH"].includes(c.req.method)) {
+            // Allow seed if needed? Probably not in readonly mode.
+            return c.json({ error: "Mongoose Studio is in Read-Only mode." }, 403);
+        }
+        await next();
+    });
+
     app.get("/api/health", (c) => c.json({ status: "ok" }));
+    app.get("/api/config", (c) => c.json({ readOnly }));
 
-    app.get("/api/models", (c) => {
-        if (!mongoose) {
-            console.error("CRITICAL: Mongoose instance is undefined in /api/models!");
-            return c.json({ error: "Server Configuration Error: Mongoose missing" }, 500);
-        }
-        try {
-            const models = mongoose.modelNames();
-            return c.json({ models });
-        } catch (e: any) {
-            console.error("CRITICAL: Error getting modelNames:", e);
-            return c.json({ error: e.message }, 500);
-        }
-    });
+    // Mount Routes
+    app.route("/api/models", schemaRoutes); // GET /api/models, GET /api/models/:name
+    app.route("/api/models", modelRoutes);  // GET /api/models/:name/data, POST, PUT, DELETE
+    app.route("/api/models", seedRoutes);   // POST /api/models/:name/seed
 
-    app.get("/api/models/:name", (c) => {
-        const name = c.req.param("name");
-        try {
-            const fields = inspectModel(name, mongoose);
-            return c.json({ model: name, fields });
-        } catch (err: any) {
-            return c.json({ error: err.message }, 404);
-        }
-    });
-
-    app.get("/api/models/:name/data", async (c) => {
-        const name = c.req.param("name");
-        const limit = Number(c.req.query("limit")) || 50;
-        const page = Number(c.req.query("page")) || 1;
-
-        try {
-            const model = mongoose.models[name];
-            if (!model) throw new Error("Model not found");
-
-            const docs = await model.find().limit(limit).skip((page - 1) * limit).lean();
-            const total = await model.countDocuments();
-
-            return c.json({
-                docs,
-                meta: {
-                    total,
-                    page,
-                    limit,
-                    pages: Math.ceil(total / limit)
-                }
-            });
-        } catch (err: any) {
-            return c.json({ error: err.message }, 500);
-        }
-    });
-
-    // Serve Static UI (Moved to end to avoid blocking API routes)
+    // Serve Static UI
     app.get("/*", async (c) => {
         const url = new URL(c.req.url);
         let pathString = url.pathname;
         if (pathString === "/" || pathString === "") pathString = "/index.html";
 
-        const uiDir = import.meta.dir.endsWith("dist")
-            ? path.join(import.meta.dir, "ui")
-            : path.join(import.meta.dir, "../dist/ui");
+        const currentDir = path.dirname(new URL(import.meta.url).pathname);
+        // Robust way to find UI assets whether running from src or dist
+        const uiDir = currentDir.endsWith("src")
+            ? path.join(currentDir, "../ui/out") // Dev mode (ts-node/tsx)
+            : currentDir.endsWith("dist")
+                ? path.join(currentDir, "ui") // Prod mode (dist structure)
+                : path.join(currentDir, "../dist/ui");
 
         const filePath = path.join(uiDir, pathString);
 
-        const file = Bun.file(filePath);
-
-        if (await file.exists()) {
-            return new Response(file);
+        if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+            const mimeType = mime.lookup(filePath) || "application/octet-stream";
+            return c.body(fs.createReadStream(filePath) as any, 200, {
+                "Content-Type": mimeType
+            });
         }
 
-        const index = Bun.file(path.join(uiDir, "index.html"));
-        if (await index.exists()) {
-            return new Response(index);
+        // Fallback for SPA routing
+        const index = path.join(uiDir, "index.html");
+        if (fs.existsSync(index)) {
+            return c.body(fs.createReadStream(index) as any, 200, {
+                "Content-Type": "text/html"
+            });
         }
 
         return c.text("UI not found. Please run build.", 404);
     });
 
-    return {
-        port,
-        fetch: app.fetch,
-    };
+    return app;
 }

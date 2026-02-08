@@ -1,16 +1,45 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 import path from "path";
-import { existsSync, readdirSync } from "fs";
+import { existsSync } from "fs";
+import { Command } from "commander";
 import { loadLocalModels } from "../src/loader";
 import { setMongoose, getMongoose } from "../src/db";
 import { startServer } from "../src/server";
 import { CONFIG } from "../config";
-import { inspectModel } from "../src/inspector";
+import { serve } from "@hono/node-server";
+import open from "open";
+import { createRequire } from "module";
 
-async function main() {
-    // Check for Help
-    if (process.argv.includes("--help") || process.argv.includes("-h")) {
-        console.log(`
+const require = createRequire(import.meta.url);
+const pkg = require("../package.json");
+
+const program = new Command();
+
+program
+    .name("mongoose-studio")
+    .description(pkg.description)
+    .version(pkg.version)
+    .option("-p, --port <number>", "Specify the port to run on", String(CONFIG.DEFAULT_PORT))
+    .option("-u, --uri <string>", "MongoDB connection URI")
+    .option("-m, --models <path>", "Path to models directory (optional override)")
+    .option("--readonly", "Enable read-only mode (disable editing)")
+    .option("--verbose", "Enable verbose logging")
+    .action(async (options) => {
+        await main(options);
+    });
+
+program.parse();
+
+interface CLIOptions {
+    port: string;
+    uri?: string;
+    models?: string;
+    readonly?: boolean;
+    verbose?: boolean;
+}
+
+async function main(options: CLIOptions) {
+    console.log(`
 \x1b[36m
   __  __                                            
  |  \\/  | ___  _ __   __ _  ___  ___  ___  ___    
@@ -24,38 +53,32 @@ async function main() {
       ___) | |_| |_| | (_| | | (_) |
      |____/ \\__|\\__,_|\\__,_|_|\\___/ 
                                     
-\x1b[0m
-Usage: mongoose-studio [options]
+\x1b[0m`);
+    console.log(`\x1b[36mv${pkg.version}\x1b[0m\n`);
+    console.log("\x1b[36mStarting Mongoose Studio...\x1b[0m\n");
 
-Options:
-  --port=<number>    Specify the port to run on (default: 5555)
-  --uri=<string>     MongoDB connection URI
-  --models=<path>    Path to models directory (optional override)
-  --help, -h         Show this help message
-        `);
-        process.exit(0);
-    }
-
-    console.log("\n\x1b[36mStarting Mongoose Studio...\x1b[0m\n");
-
-    // Parse Flags
-    if (process.argv.includes("--verbose") || process.argv.includes("-v")) {
+    // Verbose Mode
+    if (options.verbose) {
         CONFIG.VERBOSE = true;
         console.log("   \x1b[33m[VERBOSE MODE ENABLED]\x1b[0m");
     }
 
+    // Read-Only Mode
+    if (options.readonly) {
+        CONFIG.READ_ONLY = true;
+        console.log("   \x1b[33m[READ-ONLY MODE ENABLED]\x1b[0m");
+    }
+
     // Check for Updates (Non-blocking)
-    checkForUpdates();
+    checkForUpdates(pkg.version);
 
     const projectRoot = process.cwd();
-    // Try to find user's mongoose
     const userMongoosePath = path.join(projectRoot, "node_modules", "mongoose");
 
     if (existsSync(userMongoosePath)) {
         try {
             // Dynamic import of user's mongoose
             const userMongoose = await import(userMongoosePath);
-            // Handle ESM/CommonJS default export difference
             setMongoose(userMongoose.default || userMongoose);
             console.log("   \x1b[32m✔\x1b[0m Mongoose detected (User Project).");
         } catch (e) {
@@ -68,12 +91,9 @@ Options:
         console.log("   \x1b[36mRead more: https://mongoose-studio.yaasir.dev/docs#mongoose-not-found\x1b[0m");
     }
 
-    // Now we can use getMongoose() to interact
     const mongoose = getMongoose();
 
-    // Load Models
-    // Priority: Command Line > src/models > models > lib/models
-    const manualModelsDir = process.argv.find(arg => arg.startsWith("--models="))?.split("=")[1];
+    const manualModelsDir = options.models; // From commander
 
     let modelsPath = "";
     if (manualModelsDir) {
@@ -103,83 +123,82 @@ Options:
         console.log("   \x1b[36mRead more: https://mongoose-studio.yaasir.dev/docs#no-mongoose-models-registered\x1b[0m");
     }
 
-    // Introspect
-    const modelNames = mongoose.modelNames();
-    console.log("\nSummary:");
-
-    if (modelNames.length === 0) {
-        console.warn("   No Mongoose models registered.");
-    } else {
-        console.log(`   Registered Models (${modelNames.length}):`);
-        // ... (logging models if needed, keeping it minimal for now)
-    }
-
     // Connect to MongoDB
-    const uriArg = process.argv.find(arg => arg.startsWith("--uri="));
-    const uri = (uriArg && uriArg.split("=")[1]) || process.env.MONGO_URI || "mongodb://localhost:27017/test";
+    const uriRaw = options.uri || process.env.MONGO_URI || "mongodb://localhost:27017/test";
+    const uri = uriRaw as string;
 
     console.log(`\nConnecting to MongoDB...`);
-    try {
-        await mongoose.connect(uri);
-        console.log("   \x1b[32m✔\x1b[0m Connected successfully.");
-    } catch (err: any) {
-        console.error("   \x1b[31m✖\x1b[0m Connection failed:", err.message);
-        console.warn("   Studio will run in Schema Inspection mode only. Data features will be disabled.");
-    }
 
-    // Start Server (API + UI)
-    // imports valid statically
+    let connected = false;
+    const maxConnectRetries = 5;
 
-    // Allow override via --port
-    const portArg = process.argv.find(arg => arg.startsWith("--port="));
-    let port = (portArg && parseInt(portArg.split("=")[1])) || CONFIG.DEFAULT_PORT;
-
-    // Retry finding port
-    const maxRetries = 10;
-    let serverStarted = false;
-
-    for (let i = 0; i < maxRetries; i++) {
+    for (let i = 0; i < maxConnectRetries; i++) {
         try {
-            Bun.serve(startServer(port, mongoose));
-            serverStarted = true;
+            await mongoose.connect(uri);
+            console.log("   \x1b[32m✔\x1b[0m Connected successfully.");
+            connected = true;
             break;
-        } catch (err: any) {
-            if (err.code === "EADDRINUSE" || err.message.includes("EADDRINUSE") || err.message.includes("address already in use")) {
-                console.log(`   Port ${port} is busy, trying ${port + 1}...`);
-                port++;
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            if (i < maxConnectRetries - 1) {
+                console.log(`   \x1b[33m⚠\x1b[0m Connection failed. Retrying in 2s... (${i + 1}/${maxConnectRetries})`);
+                await new Promise(resolve => setTimeout(resolve, 2000));
             } else {
-                throw err;
+                console.error("   \x1b[31m✖\x1b[0m Connection failed:", msg);
+                console.warn("   Studio will run in Schema Inspection mode only. Data features will be disabled.");
             }
         }
     }
 
-    if (!serverStarted) {
-        console.error(`\n\x1b[31m✖\x1b[0m Failed to start server after ${maxRetries} attempts. Please specify a free port using --port=NUMBER`);
-        process.exit(1);
-    }
+    // Start Server
+    const port = parseInt(options.port) || CONFIG.DEFAULT_PORT;
+    const maxRetries = 10;
 
-    console.log(`\n\x1b[36mStudio running at http://localhost:${port}\x1b[0m`);
+    // Get Hono App
+    const app = startServer(port, mongoose, CONFIG.READ_ONLY);
 
-    // Open Browser
-    setTimeout(() => {
-        const url = `http://localhost:${port}`;
-        // Print usage instructions clearly, useful for Docker logs
-        console.log(`\nTo access Mongoose Studio, open:\n\x1b[4m${url}\x1b[0m\n`);
-
-        const openCmd = process.platform === "darwin" ? "open" :
-            process.platform === "linux" ? "xdg-open" : "start";
+    const tryListen = (currentPort: number, retries: number) => {
+        if (retries === 0) {
+            console.error(`\n\x1b[31m✖\x1b[0m Failed to find a free port after ${maxRetries} attempts.`);
+            process.exit(1);
+        }
 
         try {
-            if (!process.env.NO_OPEN) {
-                Bun.spawn([openCmd, url], {
-                    stderr: "ignore",
-                    stdout: "ignore"
-                }).unref();
-            }
+            const server = serve({
+                fetch: app.fetch,
+                port: currentPort
+            });
+
+            server.on('listening', () => {
+                const url = `http://localhost:${currentPort}`;
+                console.log(`\n\x1b[36mStudio running at ${url}\x1b[0m`);
+
+                setTimeout(() => {
+                    console.log(`\nTo access Mongoose Studio, open:\n\x1b[4m${url}\x1b[0m\n`);
+                    if (!process.env.NO_OPEN) {
+                        open(url).catch(() => { });
+                    }
+                }, 1000);
+            });
+
+            server.on('error', (e: NodeJS.ErrnoException) => {
+                if (e.code === 'EADDRINUSE') {
+                    console.log(`   Port ${currentPort} is busy, trying ${currentPort + 1}...`);
+                    server.close(); // Ensure clean
+                    tryListen(currentPort + 1, retries - 1);
+                } else {
+                    console.error("Server error:", e);
+                    process.exit(1);
+                }
+            });
+
         } catch (e) {
-            // Ignore failure to open browser (common in Docker/Servers)
+            // Synchronous error?
+            console.error(e);
         }
-    }, 1000);
+    };
+
+    tryListen(port, maxRetries);
 
     console.log(`Press Ctrl+C to stop.`);
 
@@ -189,26 +208,10 @@ Options:
     });
 }
 
-main().catch(err => {
-    console.error("Fatal Error:", err);
-    process.exit(1);
-});
-
-async function checkForUpdates() {
+async function checkForUpdates(currentVersion: string) {
     try {
-        const pkg = require(path.join(process.cwd(), "package.json"));
-        // Note: The above might load the project's package.json if run from project root. 
-        // To be safe, we should load our OWN package.json. 
-        // In the build structure, package.json is usually at root or dist. 
-        // But for Global CLI, checking "mongoose-studio" registry is enough.
-
-        // We can just use hardcoded version or read from ../package.json if we are in bin/
-        // But simpler: just fetch latest and compare. 
-        // If we want current version, we can import it.
-        const currentVersion = "1.0.3";
-
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 1000); // 1s timeout
+        const timeoutId = setTimeout(() => controller.abort(), 1000);
 
         const res = await fetch("https://registry.npmjs.org/mongoose-studio/latest", {
             signal: controller.signal
@@ -224,7 +227,6 @@ async function checkForUpdates() {
             }
         }
     } catch (e) {
-        // Ignore update check failures
-        if (CONFIG.VERBOSE) console.log("   \x1b[33m[DEBUG]\x1b[0m Update check failed (ignoring).");
+        // Ignore
     }
 }

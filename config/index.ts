@@ -9,4 +9,5 @@ export const CONFIG = {
     // Feature flags
     IS_DEV: process.env.NODE_ENV !== "production",
     VERBOSE: false, // Set to true via CLI args
+    READ_ONLY: false,
 };

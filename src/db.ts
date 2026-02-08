@@ -6,7 +6,7 @@ let mongooseInstance: Mongoose | null = null;
 // Default import for fallback types, but we prefer the injected instance
 import * as defaultMongoose from "mongoose";
 
-export function setMongoose(instance: any) {
+export function setMongoose(instance: Mongoose) {
     mongooseInstance = instance;
 }
 
